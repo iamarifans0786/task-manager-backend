@@ -12,6 +12,10 @@ app.use(express.json())
 app.use(cors({ origin: '*' }))
 
 
+app.get("/", (req, res) => {
+    res.send("<h1>Project is running successfully! 🚀</h1>");
+});
+
 ConnectionMongoDB().then(() => {
     console.log('Database connected successfully');
 
@@ -22,9 +26,6 @@ ConnectionMongoDB().then(() => {
 }).catch((error) => {
     console.log('Database connection failed:', error.message);
 })
-
-
-
 
 app.listen(process.env.port, () => {
     console.log(`Server is running on http://localhost:${process.env.port}`)
