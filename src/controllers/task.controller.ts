@@ -34,8 +34,11 @@ export class TaskController {
         try {
             const id = req?.user?._id
 
+            console.log(id)
+
             const tasks = await TaskSchema.find({ user: id })
-            if (tasks.length === 0) return responseStatus(res, 404, 'No tasks found..', [])
+            console.log(tasks)
+            if (tasks.length === 0) return responseStatus(res, 200, 'No tasks found.', [])
 
             return responseStatus(res, 200, 'Task fetch successfully.', tasks);
         } catch (error: any) {
@@ -47,7 +50,7 @@ export class TaskController {
     getAllTask = async (req: Request | any, res: Response) => {
         try {
             const tasks = await TaskSchema.find().populate('user', 'email name phone')
-            if (tasks.length === 0) return responseStatus(res, 404, 'No tasks found.', [])
+            if (tasks.length === 0) return responseStatus(res, 200, 'No tasks found.', [])
 
             return responseStatus(res, 200, 'Task fetch successfully.', tasks);
         } catch (error: any) {
