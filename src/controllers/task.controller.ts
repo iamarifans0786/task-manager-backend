@@ -34,10 +34,7 @@ export class TaskController {
         try {
             const id = req?.user?._id
 
-            console.log(id)
-
             const tasks = await TaskSchema.find({ user: id })
-            console.log(tasks)
             if (tasks.length === 0) return responseStatus(res, 200, 'No tasks found.', [])
 
             return responseStatus(res, 200, 'Task fetch successfully.', tasks);

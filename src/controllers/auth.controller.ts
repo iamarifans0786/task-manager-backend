@@ -17,7 +17,7 @@ export class AuthController {
             }
 
             const userExits = await UserSchema.findOne({ email })
-            if (userExits) return responseStatus(res, 200, 'Email already exits.', null)
+            if (userExits) return responseStatus(res, 400, 'Email already exits.', null)
 
             const hashedPassword = await bcrypt.hash(password, 10)
             const newUser = await UserSchema.create({
@@ -103,6 +103,76 @@ export class AuthController {
             return responseStatus(res, 200, 'User fetch successfully.', user)
         } catch (error: any) {
             console.log("Getting  user error: ", error)
+            return responseStatus(res, 500, error.message || "Something went wrong.", error)
+        }
+    }
+
+    create = async (req: Request, res: Response) => {
+        try {
+            const { name, email, phone, password } = req.body
+            const fields = { name, email, phone, password };
+
+            for (const [key, value] of Object.entries(fields)) {
+                if (!value) return responseStatus(res, 400, `${key.charAt(0).toUpperCase() + key.slice(1)} is required`, []);
+            }
+
+            const userExits = await UserSchema.findOne({ email })
+            if (userExits) return responseStatus(res, 400, 'Email already exits.', [])
+            console.log(userExits)
+
+            const hashedPassword = await bcrypt.hash(password, 10)
+            const newUser = await UserSchema.create({
+                name,
+                email,
+                phone,
+                password: hashedPassword
+            })
+            const data = newUser.toObject()
+            delete data.password
+
+            return responseStatus(res, 201, 'User created successfully.', data)
+        } catch (error: any) {
+            console.log("Creating User error: ", error)
+            return responseStatus(res, 500, error.message || "Something went wrong.", error)
+        }
+    }
+
+    editUser = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.query;
+            const { name, email, phone } = req.body;
+            const fields = { name, email, phone };
+
+            for (const [key, value] of Object.entries(fields)) {
+                if (!value) {
+                    return responseStatus(res, 400, `${key.charAt(0).toUpperCase() + key.slice(1)} is required`, null);
+                }
+            }
+
+            const emailExits = await UserSchema.findOne({ email })
+            console.log(emailExits)
+            if (emailExits) return responseStatus(res, 400, 'Email already exits.', null)
+
+            const user = await UserSchema.findById(id)
+            if (!user) {
+                return responseStatus(res, 404, 'User not found.', null)
+            }
+
+            user.name = name
+            user.email = email
+            user.phone = phone
+            await user.save()
+
+            const data = {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+            };
+
+            return responseStatus(res, 200, 'User updated successfully.', data)
+        } catch (error: any) {
+            console.log("Updating User error: ", error);
             return responseStatus(res, 500, error.message || "Something went wrong.", error)
         }
     }
